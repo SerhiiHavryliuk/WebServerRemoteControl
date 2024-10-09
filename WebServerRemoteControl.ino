@@ -7,9 +7,18 @@
 // Load Wi-Fi library
 #include <WiFi.h>
 
-// Replace with your network credentials
-const char* ssid = "";
-const char* password = "";
+
+// TFT Dispaly
+#include <TFT_eSPI.h> // Graphics and font library for ST7735 driver chip
+#include <SPI.h>
+
+TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
+
+#define TFT_GREY 0x5AEB // New colour
+// TFT Dispaly
+
+const char* ssid = "WIFI network name";
+const char* password = "password wifi network";
 
 // Set web server port number to 80
 WiFiServer server(80);
@@ -18,12 +27,12 @@ WiFiServer server(80);
 String header;
 
 // Auxiliar variables to store the current output state
-String output26State = "off";
-String output27State = "off";
+String FirePower_1 = "off";
+String FireTamper_1 = "off";
 
 // Assign output variables to GPIO pins
-const int output26 = 26;
-const int output27 = 27;
+const int pinFirePower_1 = 26;
+const int pinFireTamper_1 = 27;
 
 // Current time
 unsigned long currentTime = millis();
@@ -33,13 +42,19 @@ unsigned long previousTime = 0;
 const long timeoutTime = 2000;
 
 void setup() {
+// TFT Dispaly
+  tft.init();
+  tft.setRotation(1);
+    clear_display();                     // Очищення екрану
+// TFT Dispaly
+
   Serial.begin(115200);
   // Initialize the output variables as outputs
-  pinMode(output26, OUTPUT);
-  pinMode(output27, OUTPUT);
+  pinMode(pinFirePower_1, OUTPUT);
+  pinMode(pinFireTamper_1, OUTPUT);
   // Set outputs to LOW
-  digitalWrite(output26, LOW);
-  digitalWrite(output27, LOW);
+  digitalWrite(pinFirePower_1, LOW);
+  digitalWrite(pinFireTamper_1, LOW);
 
   // Connect to Wi-Fi network with SSID and password
   Serial.print("Connecting to ");
@@ -54,11 +69,21 @@ void setup() {
   Serial.println("WiFi connected.");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+  String url = String(WiFi.localIP());
+  showMainMenu(url);// todo: не виводиться на дисплей строка урла за якою можна відкрити вебінтерфейс
+  Serial.println(url);
   server.begin();
 }
 
-void loop(){
+void loop() {
   WiFiClient client = server.available();   // Listen for incoming clients
+
+  // Перевірка вхідних даних із Serial Monitor
+  if (Serial.available() > 0) {
+    String command = Serial.readStringUntil('\n'); // Читання команди до символу нового рядка
+    command.trim(); // Видалення пробілів на початку та в кінці команди
+    handleSerialCommand(command); // Виклик функції обробки команд
+  }
 
   if (client) {                             // If a new client connects,
     currentTime = millis();
@@ -84,21 +109,21 @@ void loop(){
             
             // turns the GPIOs on and off
             if (header.indexOf("GET /26/on") >= 0) {
-              Serial.println("GPIO 26 on");
-              output26State = "on";
-              digitalWrite(output26, HIGH);
+              Serial.println("CH 1 Power on (26 gpio)");
+              FirePower_1 = "on";
+              digitalWrite(pinFirePower_1, HIGH);
             } else if (header.indexOf("GET /26/off") >= 0) {
-              Serial.println("GPIO 26 off");
-              output26State = "off";
-              digitalWrite(output26, LOW);
+              Serial.println("CH 1 Power off (26 gpio)");
+              FirePower_1 = "off";
+              digitalWrite(pinFirePower_1, LOW);
             } else if (header.indexOf("GET /27/on") >= 0) {
-              Serial.println("GPIO 27 on");
-              output27State = "on";
-              digitalWrite(output27, HIGH);
+              Serial.println("CH 1 Tamper on (27 gpio)");
+              FireTamper_1 = "on";
+              digitalWrite(pinFireTamper_1, HIGH);
             } else if (header.indexOf("GET /27/off") >= 0) {
-              Serial.println("GPIO 27 off");
-              output27State = "off";
-              digitalWrite(output27, LOW);
+              Serial.println("CH 1 Tamper off (27 gpio)");
+              FireTamper_1 = "off";
+              digitalWrite(pinFireTamper_1, LOW);
             }
             
             // Display the HTML web page
@@ -115,19 +140,19 @@ void loop(){
             // Web Page Heading
             client.println("<body><h1>ESP32 Web Server</h1>");
             
-            // Display current state, and ON/OFF buttons for GPIO 26  
-            client.println("<p>GPIO 26 - State " + output26State + "</p>");
-            // If the output26State is off, it displays the ON button       
-            if (output26State=="off") {
+            // Display current state CH 1 Power, and ON/OFF buttons for GPIO 26  
+            client.println("<p>CH 1 Power (26 gpio) - State " + FirePower_1 + "</p>");
+            // If the FirePower_1 is off, it displays the ON button       
+            if (FirePower_1=="off") {
               client.println("<p><a href=\"/26/on\"><button class=\"button\">ON</button></a></p>");
             } else {
               client.println("<p><a href=\"/26/off\"><button class=\"button button2\">OFF</button></a></p>");
             } 
                
-            // Display current state, and ON/OFF buttons for GPIO 27  
-            client.println("<p>GPIO 27 - State " + output27State + "</p>");
-            // If the output27State is off, it displays the ON button       
-            if (output27State=="off") {
+            // Display current state CH 1 Tamper, and ON/OFF buttons for GPIO 27  - Tamper
+            client.println("<p>CH 1 Tamper (27 gpio)- State " + FireTamper_1 + "</p>");
+            // If the FireTamper_1 is off, it displays the ON button       
+            if (FireTamper_1=="off") {
               client.println("<p><a href=\"/27/on\"><button class=\"button\">ON</button></a></p>");
             } else {
               client.println("<p><a href=\"/27/off\"><button class=\"button button2\">OFF</button></a></p>");
@@ -154,3 +179,55 @@ void loop(){
     Serial.println("");
   }
 }
+
+// Функція для обробки команд із Serial Monitor
+void handleSerialCommand(String command) {
+  if (command == "request_ch_1_power_on") {
+    digitalWrite(pinFirePower_1, HIGH);
+    Serial.println("response_ch_1_power_on");
+  } else if (command == "request_ch_1_power_off") {
+    digitalWrite(pinFirePower_1, LOW);
+    Serial.println("response_ch_1_power_off");
+  } else if (command == "request_ch_1_tamper_on") {
+    digitalWrite(pinFireTamper_1, HIGH);
+    Serial.println("response_ch_1_tamper_on");
+  } else if (command == "request_ch_1_tamper_off") {
+    digitalWrite(pinFireTamper_1, LOW);
+    Serial.println("response_ch_1_tamper_off");
+  } else {
+    Serial.println("Unknown command: " + command);
+  }
+}
+
+
+void showMainMenu(String text){
+  tft.fillScreen(TFT_GREY);
+  tft.setCursor(0, 4, 4);  // Встановлюємо курсор для виводу тексту
+  tft.println("Menu:");    // Виводимо заголовок меню
+  tft.println();
+
+  tft.setTextColor(TFT_WHITE);  // Білий колір для тексту
+  tft.print("URL ");
+  tft.setTextColor(TFT_YELLOW);         // Жовтий колір для температури
+  tft.println(text);  // Виводимо початкову температуру
+}
+
+// -------------------------------------------------------------------------------
+// Очищення екрану
+// -------------------------------------------------------------------------------
+void clear_display() {
+  tft.fillScreen(TFT_BLACK);  // Заповнюємо екран чорним кольором
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
