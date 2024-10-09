@@ -1,11 +1,11 @@
 # WebServerRemoteControl
 
-## API
-http://192.168.1.106/26/on
-http://192.168.1.106/26/off
+## API example
+   ####  http://192.168.1.106/26/on
+   ####  http://192.168.1.106/26/off
 
-http://192.168.1.106/27/on
-http://192.168.1.106/27/off
+   ####  http://192.168.1.106/27/on
+   ####  http://192.168.1.106/27/off
 
 ## Comands Serial Monitor
 ### 1 Chanel
