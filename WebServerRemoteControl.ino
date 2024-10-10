@@ -1,6 +1,5 @@
 /*********
-  Rui Santos
-  Complete project details at http://randomnerdtutorials.com  
+  Serhii 
   Example - https://randomnerdtutorials.com/esp32-web-server-arduino-ide/
 *********/
 
@@ -19,6 +18,8 @@ TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
 const char* ssid = "WIFI network name";
 const char* password = "password wifi network";
+
+const char* RELEASE_VERSION = "v2024.0";
 
 // Set web server port number to 80
 WiFiServer server(80);
@@ -194,12 +195,18 @@ void handleSerialCommand(String command) {
   } else if (command == "request_ch_1_tamper_off") {
     digitalWrite(pinFireTamper_1, LOW);
     Serial.println("response_ch_1_tamper_off");
+  } else if (command == "release_version") {
+    Serial.println(RELEASE_VERSION);
   } else {
     Serial.println("Unknown command: " + command);
   }
 }
 
-
+// -------------------------------------------------------------------------------
+// Показати головне меню 
+// todo: потрібне щоб на екран виводити стан системи, урл в якому відкривати, дебаг та помилки системи
+// поки не виводиться урл, треба розібратись
+// -------------------------------------------------------------------------------
 void showMainMenu(String text){
   tft.fillScreen(TFT_GREY);
   tft.setCursor(0, 4, 4);  // Встановлюємо курсор для виводу тексту

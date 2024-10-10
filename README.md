@@ -20,3 +20,6 @@
     #### response_ch_1_tamper_on - вкл кнопку tamper на датчику
     #### response_ch_1_tamper_off - викл кнопку tamper на датчику
 
+  ### Системні запити
+    #### release_version - повертає версію прошивки
+
