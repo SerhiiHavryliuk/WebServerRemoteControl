@@ -1,5 +1,7 @@
 /*********
-  Serhii 
+  Serhii: 
+  RELEASE_VERSION = "v2024.1"
+  Wifi remoute control with user interface for controls two reles.
   Example - https://randomnerdtutorials.com/esp32-web-server-arduino-ide/
 *********/
 
