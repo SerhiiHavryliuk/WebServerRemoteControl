@@ -23,3 +23,5 @@
   ### Системні запити
     #### release_version - повертає версію прошивки
 
+## User interface
+![UI Interface Screenshot](./Screenshot-ui-interface.png)
