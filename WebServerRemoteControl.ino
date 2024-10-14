@@ -1,6 +1,6 @@
 /*********
   Serhii 
-  RELEASE_VERSION = "v2024.2"
+  RELEASE_VERSION = "v2024.3"
   Serial monitor controls
 *********/
 
