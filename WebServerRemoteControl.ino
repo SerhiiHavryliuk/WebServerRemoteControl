@@ -20,8 +20,8 @@ String FirePower_1 = "off";
 String FireTamper_1 = "off";
 
 // Assign output variables to GPIO pins
-const int pinFirePower_1 = 26;
-const int pinFireTamper_1 = 27;
+const int pinDevicePower_1 = 13;
+const int pinDeviceTamper_1 = 12;
 
 void setup() {
   Serial.begin(115200);
@@ -41,11 +41,11 @@ void setup() {
    // TFT Dispaly
 
   // Initialize the output variables as outputs
-  pinMode(pinFirePower_1, OUTPUT);
-  pinMode(pinFireTamper_1, OUTPUT);
+  pinMode(pinDevicePower_1, OUTPUT);
+  pinMode(pinDeviceTamper_1, OUTPUT);
   // Set outputs to LOW
-  digitalWrite(pinFirePower_1, LOW);
-  digitalWrite(pinFireTamper_1, LOW);
+  digitalWrite(pinDevicePower_1, LOW);
+  digitalWrite(pinDeviceTamper_1, LOW);
 
   Serial.println("Setup end");
   showMainMenu("Setup end");
@@ -64,16 +64,16 @@ void loop() {
 // Функція для обробки команд із Serial Monitor
 void handleSerialCommand(String command) {
   if (command == "request_ch_1_power_on") {
-    digitalWrite(pinFirePower_1, HIGH);
+    digitalWrite(pinDevicePower_1, HIGH);
     Serial.println("response_ch_1_power_on");
   } else if (command == "request_ch_1_power_off") {
-    digitalWrite(pinFirePower_1, LOW);
+    digitalWrite(pinDevicePower_1, LOW);
     Serial.println("response_ch_1_power_off");
   } else if (command == "request_ch_1_tamper_on") {
-    digitalWrite(pinFireTamper_1, HIGH);
+    digitalWrite(pinDeviceTamper_1, HIGH);
     Serial.println("response_ch_1_tamper_on");
   } else if (command == "request_ch_1_tamper_off") {
-    digitalWrite(pinFireTamper_1, LOW);
+    digitalWrite(pinDeviceTamper_1, LOW);
     Serial.println("response_ch_1_tamper_off");
   } else if (command == "release_version") {
     Serial.println(RELEASE_VERSION);
